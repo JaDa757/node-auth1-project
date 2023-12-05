@@ -42,10 +42,10 @@ router.post('/register',
     const hash = bcrypt.hashSync(password, 8)
 
     User.add({ username, password: hash })
-    .then(saved => {
-      res.status(201).json(saved)
-    })
-    .catch(next)
+      .then(saved => {
+        res.status(201).json(saved)
+      })
+      .catch(next)
   })
 
 /**
@@ -65,7 +65,13 @@ router.post('/register',
  */
 
 router.post('/login', checkUsernameExists, (req, res, next) => {
-  res.json('login')
+  const { password } = req.body
+  if (bcrypt.compareSync(password, req.user.password)) {
+    req.session.user = req.user
+    res.json({ message: `Welcome ${req.user.username}` })
+  } else {
+    next({ status: 401, message: 'Invalid credentials' })
+  }
 })
 /**
   3 [GET] /api/auth/logout
